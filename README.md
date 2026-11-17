@@ -52,3 +52,13 @@ MIT License。
 来源记录（Source，专属业务字段校验）、口径版本（Policy）、核算报告（Run）、交付计划（Schedule）、交付（Delivery）均经数据库→模型→请求schema→service→route/controller→frontend API→store→page。Period为已有来源期间字典，在任务期间选择器使用；不单独作为复杂度计数。底稿JSON为小型多字段单记录存储，不虚构未落库的子实体。
 
 实际表：期间字典 activity_periods；专属来源 activities；冻结口径 emission_factors；异步报告 carbon_runs。
+
+## 附：树形计量核平核算模块（meter_recon/）
+
+总表与分表读数不平时直接相加会重复计排放。`meter_recon/` 为自包含（仅标准库）的
+树形计量核平模块：登记父子表、读数、正权重、上下限与锁定值，最小化全体加权调整
+平方和，使每个父表等于子表之和且满足限值，排放只按叶表计。无可行解时给出冲突
+约束且不生成可复核报告；核平队列留存原始读数与校正依据；源数据更新后未复核结果
+失效，复核与更新并发时拒绝过时通过；万表规模内存随表数线性增长，超时拒绝近似
+冒充完成。运行 `python3 run_app.py --demo` 后访问 http://127.0.0.1:8000 ，
+测试 `python3 -m unittest discover -s tests -v`。详见 `meter_recon/README.md`。
